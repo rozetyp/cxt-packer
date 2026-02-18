@@ -15,6 +15,9 @@ ENV/
 .DS_Store
 Thumbs.db
 
+# Internal Chat/Summary
+SESSION_SUMMARY.md
+
 # Demo/Temp data
 demo_inputs/
 test_inputs/
