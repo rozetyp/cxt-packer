@@ -24,7 +24,7 @@ python3 demo_benchmark.py
 | Registry | GHCR (`ghcr.io`) |
 | Client | Pure Python, `requests` only — no Docker, no ORAS |
 
-The pipeline is simulated with realistic timing (`~1.4s/chunk`). The corpus and artifact are generated deterministically — same bytes every run, which means the same `ctx://` URI every run. That's the point.
+**Note:** This benchmark simulates OCR/chunk/embed timing (`~1.4s/chunk` sleep) to demonstrate cache identity and reuse behavior. It does not measure actual embedding model throughput. The corpus and artifact are generated deterministically — same bytes every run, which means the same `ctx://` URI every run. That's the point.
 
 ---
 
@@ -61,7 +61,7 @@ Same contract URI. Cache is populated. Zero recompute.
 ✅ Artifact verified: index.vec (50.0MB)
 ```
 
-For **cross-machine** reuse (real push → pull over GHCR), expected transfer time for a 50MB artifact on a standard connection is **~3–8 seconds** — still orders of magnitude faster than recomputing.
+For **cross-machine** reuse (push → pull over GHCR): real measured timings are not yet published — that's the next step. The local cache behavior above is the reproduced result. Network transfer for 50MB will be network-bound, not compute-bound — measured benchmarks coming.
 
 ---
 
@@ -116,6 +116,8 @@ Understanding when a URI changes (and when it doesn't) is the whole contract:
 
 ## How to Reproduce
 
+**Local cache behavior is reproducible with no credentials needed.**
+
 **Requirements:** Python 3.8+, `pip install requests`
 
 ```bash
@@ -125,7 +127,7 @@ pip install -e .
 python3 demo_benchmark.py
 ```
 
-No credentials. No registry. Everything runs locally. You will see the exact same URIs as above because the corpus is generated with a fixed random seed.
+Everything runs locally. You will see the exact same URIs as above because the corpus is generated with a fixed random seed. The simulated pipeline timings (~8.5s cold) are `sleep`-based to demonstrate cache correctness, not actual OCR/embedding throughput.
 
 ---
 
