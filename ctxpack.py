@@ -6,6 +6,7 @@ import tarfile
 import base64
 import requests
 import tempfile
+from datetime import datetime, timezone
 from pathlib import Path
 
 class CtxPackError(Exception): pass
@@ -159,7 +160,7 @@ class CtxPack:
         manifest = {
             "uri": uri,
             "contract": contract,
-            "provenance": {"host": os.uname().nodename, "user": self.user, "timestamp": "2026-02-18T15:00:00Z"}
+            "provenance": {"host": os.uname().nodename, "user": self.user, "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
         }
         with open(target_path / "manifest.json", "w") as f:
             json.dump(manifest, f, indent=2)
@@ -200,7 +201,8 @@ class CtxPack:
         r = requests.post(f"https://{self.registry_url}/v2/{self.repo}/blobs/uploads/", headers=headers)
         cfg_url = r.headers.get("Location")
         if not cfg_url.startswith("http"): cfg_url = f"https://{self.registry_url}{cfg_url}"
-        requests.put(f"{cfg_url}&digest={config_digest}", headers=headers, data=config_data)
+        cfg_separator = "?" if "?" not in cfg_url else "&"
+        requests.put(f"{cfg_url}{cfg_separator}digest={config_digest}", headers=headers, data=config_data)
 
         # 4. Upload Manifest
         manifest = {
